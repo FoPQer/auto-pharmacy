@@ -52,6 +52,9 @@ func main() {
 	r.HandleFunc("/supply", controllers.SupplyIndex).Methods("GET")
 	r.HandleFunc("/supply", controllers.SupplySet).Methods("POST")
 	r.HandleFunc("/supply/{supply}", controllers.SupplyGet)
+	r.HandleFunc("/supply/{supply}", controllers.SupplyDelete).Methods("DELETE")
+	r.HandleFunc("/supply/{supply}/restore", controllers.SupplyRestore).Methods("PUT")
+	r.HandleFunc("/supply/{supply}/force", controllers.SupplyForceDelete).Methods("DELETE")
 
 	srv := http.Server{
 		Addr:         ":8080",

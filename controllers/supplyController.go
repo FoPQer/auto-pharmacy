@@ -70,3 +70,42 @@ func SupplySet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func SupplyDelete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if err := services.DeleteMedicine(vars["supply"]); err != nil {
+		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	if _, err := w.Write(nil); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func SupplyRestore(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if err := services.RestoreMedicine(vars["supply"]); err != nil {
+		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	if _, err := w.Write(nil); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func SupplyForceDelete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if err := services.ForceDeleteMedicine(vars["supply"]); err != nil {
+		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	if _, err := w.Write(nil); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}

@@ -37,3 +37,24 @@ func SetSupply(body *json.Decoder) (models.MedicineSupply, error) {
 
 	return supply, nil
 }
+
+func DeleteSupply(id string) error {
+	if err := database.MysqlDB.DB.Delete(&models.MedicineSupply{}, id).Error; err != nil {
+		return errors.Join(errors.New("Supply delete error"), err)
+	}
+	return nil
+}
+
+func RestoreSupply(id string) error {
+	if err := database.MysqlDB.DB.Unscoped().Model(&models.MedicineSupply{}).Where("id = ?", id).Update("deleted_at", nil).Error; err != nil {
+		return errors.Join(errors.New("Supply restore error"), err)
+	}
+	return nil
+}
+
+func ForceDeleteSupply(id string) error {
+	if err := database.MysqlDB.DB.Unscoped().Delete(&models.MedicineSupply{}, id).Error; err != nil {
+		return errors.Join(errors.New("Supply force delete error"), err)
+	}
+	return nil
+}
