@@ -37,6 +37,21 @@ func SetMedicine(body *json.Decoder) (models.Medicine, error) {
 	return medicine, nil
 }
 
+func UpdateMedicine(id string, body *json.Decoder) (models.Medicine, error) {
+	medicine, err := GetMedicine(id)
+	if err != nil {
+		return models.Medicine{}, err
+	}
+	if err := body.Decode(&medicine); err != nil {
+		return models.Medicine{}, errors.Join(errors.New("Medicine decode error"), err)
+	}
+	if err := database.MysqlDB.DB.Save(&medicine).Error; err != nil {
+		return models.Medicine{}, errors.Join(errors.New("Medicine save error"), err)
+	}
+
+	return medicine, nil
+}
+
 func DeleteMedicine(id string) error {
 	if err := database.MysqlDB.DB.Delete(&models.Medicine{}, id).Error; err != nil {
 		return errors.Join(errors.New("Medicine delete error"), err)
