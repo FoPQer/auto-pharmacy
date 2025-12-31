@@ -27,7 +27,6 @@ func MedicineIndex(w http.ResponseWriter, r *http.Request) {
 
 func MedicineGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	w.WriteHeader(http.StatusOK)
 	medicine, err := services.GetMedicine(vars["medicine"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -42,7 +41,11 @@ func MedicineGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(res)
+	w.WriteHeader(http.StatusOK)
+	if _, err := w.Write(res); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func MedicineSet(w http.ResponseWriter, r *http.Request) {
@@ -59,6 +62,45 @@ func MedicineSet(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusCreated)
 	if _, err := w.Write(res); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func MedicineDelete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if err := services.DeleteMedicine(vars["medicine"]); err != nil {
+		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	if _, err := w.Write(nil); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func MedicineRestore(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if err := services.RestoreMedicine(vars["medicine"]); err != nil {
+		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	if _, err := w.Write(nil); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func MedicineForceDelete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if err := services.ForceDeleteMedicine(vars["medicine"]); err != nil {
+		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	if _, err := w.Write(nil); err != nil {
 		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
 		return
 	}

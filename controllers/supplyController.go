@@ -30,7 +30,6 @@ func SupplyIndex(w http.ResponseWriter, r *http.Request) {
 
 func SupplyGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	w.WriteHeader(http.StatusOK)
 	supply, err := services.GetSupply(vars["supply"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -45,6 +44,7 @@ func SupplyGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 	if _, err := w.Write(res); err != nil {
 		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
 		return

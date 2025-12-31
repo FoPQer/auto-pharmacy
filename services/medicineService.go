@@ -27,7 +27,6 @@ func GetMedicine(id string) (models.Medicine, error) {
 
 func SetMedicine(body *json.Decoder) (models.Medicine, error) {
 	medicine := models.Medicine{}
-	supply := models.MedicineSupply{}
 	if err := body.Decode(&medicine); err != nil {
 		return models.Medicine{}, errors.Join(errors.New("Medicine decode error"), err)
 	}
@@ -35,13 +34,26 @@ func SetMedicine(body *json.Decoder) (models.Medicine, error) {
 		return models.Medicine{}, errors.Join(errors.New("Medicine create error"), err)
 	}
 
-	if err := body.Decode(&supply); err != nil {
-		return models.Medicine{}, errors.Join(errors.New("Supply decode error"), err)
-	}
-	supply.MedicineID = medicine.ID
-	if err := database.MysqlDB.DB.Create(&supply).Error; err != nil {
-		return models.Medicine{}, errors.Join(errors.New("Supply create error"), err)
-	}
-
 	return medicine, nil
+}
+
+func DeleteMedicine(id string) error {
+	if err := database.MysqlDB.DB.Delete(&models.Medicine{}, id).Error; err != nil {
+		return errors.Join(errors.New("Medicine delete error"), err)
+	}
+	return nil
+}
+
+func RestoreMedicine(id string) error {
+	if err := database.MysqlDB.DB.Unscoped().Model(&models.Medicine{}).Where("id = ?", id).Update("deleted_at", nil).Error; err != nil {
+		return errors.Join(errors.New("Medicine restore error"), err)
+	}
+	return nil
+}
+
+func ForceDeleteMedicine(id string) error {
+	if err := database.MysqlDB.DB.Unscoped().Delete(&models.Medicine{}, id).Error; err != nil {
+		return errors.Join(errors.New("Medicine force delete error"), err)
+	}
+	return nil
 }
