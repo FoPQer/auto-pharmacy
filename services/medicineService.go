@@ -67,6 +67,9 @@ func RestoreMedicine(id string) error {
 }
 
 func ForceDeleteMedicine(id string) error {
+	if err := database.MysqlDB.DB.Unscoped().Association("Supplies").Clear(); err != nil {
+		return errors.Join(errors.New("MedicineSupply clear error"), err)
+	}
 	if err := database.MysqlDB.DB.Unscoped().Delete(&models.Medicine{}, id).Error; err != nil {
 		return errors.Join(errors.New("Medicine force delete error"), err)
 	}

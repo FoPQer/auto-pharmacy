@@ -2,6 +2,7 @@ package models
 
 import (
 	"auto-pharmacy/database"
+	"errors"
 	"fmt"
 	"time"
 
@@ -13,7 +14,7 @@ type MedicineSupply struct {
 	Count      float64   `gorm:"count" json:"count"`
 	Expired_at time.Time `gorm:"expired_at" json:"expired_at"`
 	MedicineID uint      `json:"medicine_id"`
-	Medicine   Medicine
+	Medicine   *Medicine
 }
 
 func MedicineSupplyMigrate() error {
@@ -36,7 +37,7 @@ func (ms MedicineSupply) Release() (bool, error) {
 		return true, nil
 	}
 
-	return false, MedicineReleaseErr{ms, fmt.Errorf("dose greater than count")}
+	return false, MedicineReleaseErr{ms, errors.New("dose greater than count")}
 }
 
 type MedicineReleaseErr struct {
