@@ -9,31 +9,34 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func MedicineIndex(w http.ResponseWriter, r *http.Request) {
-	medicines, err := services.GetAllMedicines()
+func SupplyIndex(w http.ResponseWriter, r *http.Request) {
+	supplies, err := services.GetAllSupplies()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	res, err := json.Marshal(medicines)
+	res, err := json.Marshal(supplies)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Write(res)
+	if _, err := w.Write(res); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
-func MedicineGet(w http.ResponseWriter, r *http.Request) {
+func SupplyGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	w.WriteHeader(http.StatusOK)
-	medicine, err := services.GetMedicine(vars["medicine"])
+	supply, err := services.GetSupply(vars["supply"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	res, err := json.Marshal(medicine)
+	res, err := json.Marshal(supply)
 	if errors.Is(err, errors.New("record not found")) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -42,22 +45,26 @@ func MedicineGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(res)
-}
-
-func MedicineSet(w http.ResponseWriter, r *http.Request) {
-	body := json.NewDecoder(r.Body)
-	med, err := services.SetMedicine(body)
-	if err != nil {
-		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+	if _, err := w.Write(res); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	res, err := json.Marshal(med)
+}
+
+func SupplySet(w http.ResponseWriter, r *http.Request) {
+	body := json.NewDecoder(r.Body)
+	sup, err := services.SetSupply(body)
+	if err != nil {
+		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	res, err := json.Marshal(sup)
 	if err != nil {
 		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+
 	if _, err := w.Write(res); err != nil {
 		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
 		return

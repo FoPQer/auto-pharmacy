@@ -42,8 +42,13 @@ func main() {
 	models.MedMigrate()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/medicines", controllers.MedicineIndex)
+	r.HandleFunc("/medicines/", controllers.MedicineIndex).Methods("GET")
+	r.HandleFunc("/medicines/", controllers.MedicineSet).Methods("POST")
 	r.HandleFunc("/medicines/{medicine}", controllers.MedicineGet)
+
+	r.HandleFunc("/supply/", controllers.SupplyIndex).Methods("GET")
+	r.HandleFunc("/supply/", controllers.SupplySet).Methods("POST")
+	r.HandleFunc("/supply/{supply}", controllers.SupplyGet)
 
 	srv := http.Server{
 		Addr:         ":8080",
