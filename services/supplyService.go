@@ -38,6 +38,21 @@ func SetSupply(body *json.Decoder) (models.MedicineSupply, error) {
 	return supply, nil
 }
 
+func UpdateSupply(id string, body *json.Decoder) (models.MedicineSupply, error) {
+	supply, err := GetSupply(id)
+	if err != nil {
+		return models.MedicineSupply{}, err
+	}
+	if err := body.Decode(&supply); err != nil {
+		return models.MedicineSupply{}, errors.Join(errors.New("Supply decode error"), err)
+	}
+	if err := database.MysqlDB.DB.Save(&supply).Error; err != nil {
+		return models.MedicineSupply{}, errors.Join(errors.New("Supply save error"), err)
+	}
+
+	return supply, nil
+}
+
 func DeleteSupply(id string) error {
 	if err := database.MysqlDB.DB.Delete(&models.MedicineSupply{}, id).Error; err != nil {
 		return errors.Join(errors.New("Supply delete error"), err)

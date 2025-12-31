@@ -71,6 +71,26 @@ func SupplySet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func SupplyUpdate(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	body := json.NewDecoder(r.Body)
+	med, err := services.UpdateSupply(vars["supply"], body)
+	if err != nil {
+		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	res, err := json.Marshal(med)
+	if err != nil {
+		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	if _, err := w.Write(res); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func SupplyDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	if err := services.DeleteMedicine(vars["supply"]); err != nil {
