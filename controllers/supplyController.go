@@ -74,12 +74,12 @@ func SupplySet(w http.ResponseWriter, r *http.Request) {
 func SupplyUpdate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	body := json.NewDecoder(r.Body)
-	med, err := services.UpdateSupply(vars["supply"], body)
+	sup, err := services.UpdateSupply(vars["supply"], body)
 	if err != nil {
 		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	res, err := json.Marshal(med)
+	res, err := json.Marshal(sup)
 	if err != nil {
 		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
 		return
@@ -93,7 +93,7 @@ func SupplyUpdate(w http.ResponseWriter, r *http.Request) {
 
 func SupplyDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if err := services.DeleteMedicine(vars["supply"]); err != nil {
+	if err := services.DeleteSupply(vars["supply"]); err != nil {
 		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -106,7 +106,7 @@ func SupplyDelete(w http.ResponseWriter, r *http.Request) {
 
 func SupplyRestore(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if err := services.RestoreMedicine(vars["supply"]); err != nil {
+	if err := services.RestoreSupply(vars["supply"]); err != nil {
 		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -119,7 +119,7 @@ func SupplyRestore(w http.ResponseWriter, r *http.Request) {
 
 func SupplyForceDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if err := services.ForceDeleteMedicine(vars["supply"]); err != nil {
+	if err := services.ForceDeleteSupply(vars["supply"]); err != nil {
 		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
 		return
 	}

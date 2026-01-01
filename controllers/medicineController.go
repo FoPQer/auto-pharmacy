@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
 func MedicineIndex(w http.ResponseWriter, r *http.Request) {
@@ -28,15 +29,15 @@ func MedicineIndex(w http.ResponseWriter, r *http.Request) {
 func MedicineGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	medicine, err := services.GetMedicine(vars["medicine"])
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	res, err := json.Marshal(medicine)
-	if errors.Is(err, errors.New("record not found")) {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -71,6 +72,10 @@ func MedicineUpdate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	body := json.NewDecoder(r.Body)
 	med, err := services.UpdateMedicine(vars["medicine"], body)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
 	if err != nil {
 		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
 		return
@@ -89,7 +94,12 @@ func MedicineUpdate(w http.ResponseWriter, r *http.Request) {
 
 func MedicineDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if err := services.DeleteMedicine(vars["medicine"]); err != nil {
+	err := services.DeleteMedicine(vars["medicine"])
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if err != nil {
 		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -102,7 +112,12 @@ func MedicineDelete(w http.ResponseWriter, r *http.Request) {
 
 func MedicineRestore(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if err := services.RestoreMedicine(vars["medicine"]); err != nil {
+	err := services.RestoreMedicine(vars["medicine"])
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if err != nil {
 		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -115,12 +130,40 @@ func MedicineRestore(w http.ResponseWriter, r *http.Request) {
 
 func MedicineForceDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if err := services.ForceDeleteMedicine(vars["medicine"]); err != nil {
+	err := services.ForceDeleteMedicine(vars["medicine"])
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if err != nil {
 		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
 	if _, err := w.Write(nil); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func MedicineRelease(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	medicine, err := services.ReleaseSupply(vars["medicine"])
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	res, err := json.Marshal(medicine)
+	if err != nil {
+		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	if _, err := w.Write(res); err != nil {
 		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
 		return
 	}

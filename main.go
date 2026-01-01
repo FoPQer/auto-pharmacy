@@ -49,6 +49,7 @@ func main() {
 	r.HandleFunc("/medicines/{medicine}", controllers.MedicineDelete).Methods("DELETE")
 	r.HandleFunc("/medicines/{medicine}/restore", controllers.MedicineRestore).Methods("PUT")
 	r.HandleFunc("/medicines/{medicine}/force", controllers.MedicineForceDelete).Methods("DELETE")
+	r.HandleFunc("/medicines/{medicine}/release", controllers.MedicineRelease).Methods("GET")
 
 	r.HandleFunc("/supply", controllers.SupplyIndex).Methods("GET")
 	r.HandleFunc("/supply", controllers.SupplySet).Methods("POST")

@@ -4,6 +4,7 @@ import (
 	"auto-pharmacy/database"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"gorm.io/gorm"
@@ -29,15 +30,14 @@ func NewMedicineSupply(count float64, expired_at time.Time, medicineId uint) *Me
 	}
 }
 
-func (ms MedicineSupply) Release() (bool, error) {
-	var m Medicine
-	database.MysqlDB.DB.Model(&ms).Association("Medicine").Find(&m)
+func (ms *MedicineSupply) Release() error {
+	m := ms.Medicine
 	if ms.Count > m.Dose {
 		ms.Count = ms.Count - m.Dose
-		return true, nil
+		return nil
 	}
 
-	return false, MedicineReleaseErr{ms, errors.New("dose greater than count")}
+	return MedicineReleaseErr{*ms, errors.New("dose " + strconv.FormatFloat(m.Dose, 'f', 2, 64) + " greater than count " + strconv.FormatFloat(ms.Count, 'f', 2, 64))}
 }
 
 type MedicineReleaseErr struct {

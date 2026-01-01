@@ -5,6 +5,7 @@ import (
 	"auto-pharmacy/models"
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 func GetAllSupplies() ([]models.MedicineSupply, error) {
@@ -72,4 +73,17 @@ func ForceDeleteSupply(id string) error {
 		return errors.Join(errors.New("Supply force delete error"), err)
 	}
 	return nil
+}
+
+func ReleaseSupply(id string) (models.MedicineSupply, error) {
+	var supply models.MedicineSupply
+	err := database.MysqlDB.DB.Model(models.MedicineSupply{}).Order("expired_at").Where("expired_at > ? AND medicine_id = ?", time.Now(), id).Preload("Medicine").Find(&supply).Error
+	if err != nil {
+		return models.MedicineSupply{}, errors.Join(errors.New("Supply finding error "), err)
+	}
+	if err := supply.Release(); err != nil {
+		return models.MedicineSupply{}, errors.Join(errors.New("Supply release error "), err)
+	}
+	database.MysqlDB.DB.Save(&supply)
+	return supply, nil
 }
