@@ -2,6 +2,7 @@ package models
 
 import (
 	"auto-pharmacy/database"
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -26,6 +27,7 @@ type Medicine struct {
 	Box              *string `gorm:"box" json:"box"`
 	Place            *string `gorm:"place" json:"place"`
 	Supplies         []MedicineSupply
+	Tags             []Tag `gorm:"many2many:medicine_tag;"`
 }
 
 func MedicineMigrate() error {
@@ -45,4 +47,11 @@ func NewMedicine(name string, measurement *string, dose float64, measurement_dos
 
 func (m Medicine) Supply(count float64, expired_at time.Time) *MedicineSupply {
 	return NewMedicineSupply(count, expired_at, m.ID)
+}
+
+func (med *Medicine) AppendTag(t *Tag) error {
+	if err := database.MysqlDB.DB.Model(med).Association("Tags").Append(t); err != nil {
+		return errors.Join(errors.New("Medicine Append Tag error"), err)
+	}
+	return nil
 }

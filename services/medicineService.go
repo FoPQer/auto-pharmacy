@@ -67,11 +67,23 @@ func RestoreMedicine(id string) error {
 }
 
 func ForceDeleteMedicine(id string) error {
-	if err := database.MysqlDB.DB.Unscoped().Association("Supplies").Clear(); err != nil {
-		return errors.Join(errors.New("MedicineSupply clear error"), err)
-	}
-	if err := database.MysqlDB.DB.Unscoped().Delete(&models.Medicine{}, id).Error; err != nil {
+	if err := database.MysqlDB.DB.Unscoped().Select("Supplies").Delete(&models.Medicine{}, id).Error; err != nil {
 		return errors.Join(errors.New("Medicine force delete error"), err)
 	}
 	return nil
+}
+
+func AssociateTagToMedicine(medicine_id string, tag_id string) (*models.Medicine, error) {
+	var medicine models.Medicine
+	var tag models.Tag
+	if err := database.MysqlDB.DB.Find(&medicine, "id = ?", medicine_id).Error; err != nil {
+		return nil, errors.Join(errors.New("Medicine Find error"), err)
+	}
+	if err := database.MysqlDB.DB.Find(&tag, "id = ?", tag_id).Error; err != nil {
+		return nil, errors.Join(errors.New("Tag Find error"), err)
+	}
+	if err := medicine.AppendTag(&tag); err != nil {
+		return nil, err
+	}
+	return &medicine, nil
 }

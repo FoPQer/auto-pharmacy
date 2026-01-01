@@ -10,25 +10,28 @@ import (
 	"gorm.io/gorm"
 )
 
-func MedicineIndex(w http.ResponseWriter, r *http.Request) {
-	medicines, err := services.GetAllMedicines()
+func TagIndex(w http.ResponseWriter, r *http.Request) {
+	tags, err := services.GetAllTags()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	res, err := json.Marshal(medicines)
+	res, err := json.Marshal(tags)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Write(res)
+	if _, err := w.Write(res); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
-func MedicineGet(w http.ResponseWriter, r *http.Request) {
+func TagGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	medicine, err := services.GetMedicine(vars["medicine"])
+	tag, err := services.GetTag(vars["tag"])
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -37,7 +40,7 @@ func MedicineGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	res, err := json.Marshal(medicine)
+	res, err := json.Marshal(tag)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -49,14 +52,14 @@ func MedicineGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func MedicineSet(w http.ResponseWriter, r *http.Request) {
+func TagSet(w http.ResponseWriter, r *http.Request) {
 	body := json.NewDecoder(r.Body)
-	med, err := services.SetMedicine(body)
+	tag, err := services.SetTag(body)
 	if err != nil {
-		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Tag error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	res, err := json.Marshal(med)
+	res, err := json.Marshal(tag)
 	if err != nil {
 		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
 		return
@@ -68,19 +71,19 @@ func MedicineSet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func MedicineUpdate(w http.ResponseWriter, r *http.Request) {
+func TagUpdate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	body := json.NewDecoder(r.Body)
-	med, err := services.UpdateMedicine(vars["medicine"], body)
+	tag, err := services.UpdateMedicine(vars["tag"], body)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	if err != nil {
-		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Tag error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	res, err := json.Marshal(med)
+	res, err := json.Marshal(tag)
 	if err != nil {
 		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
 		return
@@ -92,15 +95,15 @@ func MedicineUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func MedicineDelete(w http.ResponseWriter, r *http.Request) {
+func TagDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	err := services.DeleteMedicine(vars["medicine"])
+	err := services.DeleteMedicine(vars["tag"])
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	if err != nil {
-		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Tag error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -110,15 +113,15 @@ func MedicineDelete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func MedicineRestore(w http.ResponseWriter, r *http.Request) {
+func TagRestore(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	err := services.RestoreMedicine(vars["medicine"])
+	err := services.RestoreMedicine(vars["tag"])
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	if err != nil {
-		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Tag error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -128,61 +131,19 @@ func MedicineRestore(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func MedicineForceDelete(w http.ResponseWriter, r *http.Request) {
+func TagForceDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	err := services.ForceDeleteMedicine(vars["medicine"])
+	err := services.ForceDeleteMedicine(vars["tag"])
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	if err != nil {
-		http.Error(w, "Medicine error "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Tag error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
 	if _, err := w.Write(nil); err != nil {
-		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func MedicineRelease(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	medicine, err := services.ReleaseSupply(vars["medicine"])
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	res, err := json.Marshal(medicine)
-	if err != nil {
-		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	if _, err := w.Write(res); err != nil {
-		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func MedicineAssociateTag(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	medicine, err := services.AssociateTagToMedicine(vars["medicine"], vars["tag"])
-	if err != nil {
-		http.Error(w, "Medicine associate error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	res, err := json.Marshal(medicine)
-	if err != nil {
-		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	if _, err := w.Write(res); err != nil {
 		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
 		return
 	}
