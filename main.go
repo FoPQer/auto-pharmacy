@@ -42,7 +42,7 @@ func main() {
 	models.MedMigrate()
 
 	r := mux.NewRouter()
-	routes.RegisterRoutes(r)
+	routes.RegisterWebRoutes(r)
 
 	srv := http.Server{
 		Addr:         ":8080",
