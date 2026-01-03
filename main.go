@@ -40,9 +40,11 @@ func main() {
 	database.MysqlDB = db
 	// defer database.Disconnect()
 	models.MedMigrate()
+	models.UserMigrate()
 
 	r := mux.NewRouter()
 	routes.RegisterWebRoutes(r)
+	routes.RegisterAuthRoutes(r)
 
 	srv := http.Server{
 		Addr:         ":8080",

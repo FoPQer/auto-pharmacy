@@ -2,6 +2,7 @@ package routes
 
 import (
 	"auto-pharmacy/controllers"
+	"auto-pharmacy/middleware"
 
 	"github.com/gorilla/mux"
 )
@@ -14,6 +15,7 @@ func RegisterWebRoutes(r *mux.Router) {
 }
 
 func medicineRoutes(r *mux.Router) {
+	r.Use(middleware.JWTAuthMiddleware)
 	r.HandleFunc("", controllers.MedicineIndex).Methods("GET")
 	r.HandleFunc("", controllers.MedicineSet).Methods("POST")
 	r.HandleFunc("/{medicine}", controllers.MedicineGet).Methods("GET")
@@ -26,6 +28,7 @@ func medicineRoutes(r *mux.Router) {
 }
 
 func supplyRoutes(r *mux.Router) {
+	r.Use(middleware.JWTAuthMiddleware)
 	r.HandleFunc("", controllers.SupplyIndex).Methods("GET")
 	r.HandleFunc("", controllers.SupplySet).Methods("POST")
 	r.HandleFunc("/{supply}", controllers.SupplyGet).Methods("GET")
@@ -36,6 +39,7 @@ func supplyRoutes(r *mux.Router) {
 }
 
 func tagRoutes(r *mux.Router) {
+	r.Use(middleware.JWTAuthMiddleware)
 	r.HandleFunc("", controllers.TagIndex).Methods("GET")
 	r.HandleFunc("", controllers.TagSet).Methods("POST")
 	r.HandleFunc("/{tag}", controllers.TagGet).Methods("GET")
@@ -47,6 +51,7 @@ func tagRoutes(r *mux.Router) {
 }
 
 func userRoutes(r *mux.Router) {
+	r.Use(middleware.JWTAuthMiddleware)
 	r.HandleFunc("", controllers.UserIndex).Methods("GET")
 	r.HandleFunc("", controllers.UserSet).Methods("POST")
 	r.HandleFunc("/{user}", controllers.UserGet).Methods("GET")

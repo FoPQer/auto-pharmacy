@@ -1,23 +1,32 @@
 package models
 
 import (
+	"auto-pharmacy/database"
 	"errors"
+	"log"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
-func HashPassword(password string) ([]byte, error) {
+func HashPassword(password string) (string, error) {
+	log.Printf("%s", string(password))
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
-		return nil, errors.Join(errors.New("Password hash error"), err)
+		return "", errors.Join(errors.New("Password hash error"), err)
 	}
-	return hashedPassword, nil
+	return string(hashedPassword), nil
 }
 
 type User struct {
-	Email    string `gorm:"email"`
-	Password []byte `gorm:"password"`
-	Name     string `gorm:"name"`
+	gorm.Model
+	Email    string `gorm:"email;unique" json:"email"`
+	Password string `gorm:"password" json:"password"`
+	Name     string `gorm:"name" json:"name"`
+}
+
+func UserMigrate() error {
+	return database.MysqlDB.DB.AutoMigrate(&User{})
 }
 
 func NewUser(email string, password string, name string) (*User, error) {

@@ -18,7 +18,7 @@ func GetAllUsers() ([]models.User, error) {
 
 func GetUser(id string) (models.User, error) {
 	var user models.User
-	if err := database.MysqlDB.DB.Model(&models.User{}).First(&user, id).Error; err != nil {
+	if err := database.MysqlDB.DB.Model(&models.User{}).Omit("password").First(&user, id).Error; err != nil {
 		return models.User{}, errors.Join(errors.New("User First error"), err)
 	}
 
@@ -29,6 +29,11 @@ func SetUser(body *json.Decoder) (models.User, error) {
 	user := models.User{}
 	if err := body.Decode(&user); err != nil {
 		return models.User{}, errors.Join(errors.New("User decode error"), err)
+	}
+	var err error
+	user.Password, err = models.HashPassword(user.Password)
+	if err != nil {
+		return models.User{}, errors.Join(errors.New("Hashing Password error"), err)
 	}
 	if err := database.MysqlDB.DB.Create(&user).Error; err != nil {
 		return models.User{}, errors.Join(errors.New("User create error"), err)
@@ -43,10 +48,27 @@ func UpdateUser(id string, body *json.Decoder) (models.User, error) {
 		return models.User{}, err
 	}
 	if err := body.Decode(&user); err != nil {
-		return models.User{}, errors.Join(errors.New("User decode error"), err)
+		return user, errors.Join(errors.New("User decode error"), err)
 	}
 	if err := database.MysqlDB.DB.Save(&user).Error; err != nil {
-		return models.User{}, errors.Join(errors.New("User save error"), err)
+		return user, errors.Join(errors.New("User save error"), err)
+	}
+
+	return user, nil
+}
+
+func ChangePassword(id string, body *json.Decoder) (models.User, error) {
+	var password string
+	user, err := GetUser(id)
+	if err != nil {
+		return models.User{}, err
+	}
+	if err := body.Decode(&password); err != nil {
+		return user, errors.Join(errors.New("Password decode error"), err)
+	}
+	user.Password, err = models.HashPassword(password)
+	if err := database.MysqlDB.DB.Save(&user).Error; err != nil {
+		return user, errors.Join(errors.New("User save error"), err)
 	}
 
 	return user, nil
