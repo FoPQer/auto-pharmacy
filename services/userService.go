@@ -9,7 +9,7 @@ import (
 
 func GetAllUsers() ([]models.User, error) {
 	var users = make([]models.User, 0)
-	if err := database.MysqlDB.DB.Model(&models.User{}).Omit("password").Find(&users).Error; err != nil {
+	if err := database.MysqlDB.DB.Model(&models.User{}).Unscoped().Omit("password").Find(&users).Error; err != nil {
 		return nil, errors.Join(errors.New("Users Find error"), err)
 	}
 
@@ -18,7 +18,7 @@ func GetAllUsers() ([]models.User, error) {
 
 func GetUser(id string) (models.User, error) {
 	var user models.User
-	if err := database.MysqlDB.DB.Model(&models.User{}).Omit("password").First(&user, id).Error; err != nil {
+	if err := database.MysqlDB.DB.Model(&models.User{}).Unscoped().Omit("password").First(&user, id).Error; err != nil {
 		return models.User{}, errors.Join(errors.New("User First error"), err)
 	}
 
