@@ -57,4 +57,5 @@ func userRoutes(r *mux.Router) {
 	r.HandleFunc("/{user}", controllers.UserDelete).Methods("DELETE", "OPTIONS")
 	r.HandleFunc("/{user}/restore", controllers.UserRestore).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/{user}/force", controllers.UserForceDelete).Methods("DELETE", "OPTIONS")
+	r.HandleFunc("/delete/mass", controllers.UserMassDelete).Methods("POST", "OPTIONS")
 }

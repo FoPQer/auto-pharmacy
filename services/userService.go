@@ -51,10 +51,14 @@ func UpdateUser(id string, body *json.Decoder) (models.User, error) {
 	if err := body.Decode(&user); err != nil {
 		return user, errors.Join(errors.New("User decode error"), err)
 	}
+	if user.Password != "" {
+		user.Password, _ = models.HashPassword(user.Password)
+	}
 	if err := database.MysqlDB.DB.Save(&user).Error; err != nil {
 		return user, errors.Join(errors.New("User save error"), err)
 	}
 
+	user.Password = ""
 	return user, nil
 }
 
@@ -72,6 +76,7 @@ func ChangePassword(id string, body *json.Decoder) (models.User, error) {
 		return user, errors.Join(errors.New("User save error"), err)
 	}
 
+	user.Password = ""
 	return user, nil
 }
 
@@ -92,6 +97,13 @@ func RestoreUser(id string) error {
 func ForceDeleteUser(id string) error {
 	if err := database.MysqlDB.DB.Unscoped().Delete(&models.User{}, id).Error; err != nil {
 		return errors.Join(errors.New("User force delete error"), err)
+	}
+	return nil
+}
+
+func MassDeleteUser(ids []int) error {
+	if err := database.MysqlDB.DB.Delete(&models.User{}, ids).Error; err != nil {
+		return errors.Join(errors.New("User mass delete error"), err)
 	}
 	return nil
 }
