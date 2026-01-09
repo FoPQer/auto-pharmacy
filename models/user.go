@@ -3,14 +3,12 @@ package models
 import (
 	"auto-pharmacy/database"
 	"errors"
-	"log"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 func HashPassword(password string) (string, error) {
-	log.Printf("%s", string(password))
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		return "", errors.Join(errors.New("Password hash error"), err)

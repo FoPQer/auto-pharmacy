@@ -39,6 +39,7 @@ func SetUser(body *json.Decoder) (models.User, error) {
 		return models.User{}, errors.Join(errors.New("User create error"), err)
 	}
 
+	user.Password = ""
 	return user, nil
 }
 
