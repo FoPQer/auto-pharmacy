@@ -145,26 +145,3 @@ func UserForceDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-func UserRelease(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	user, err := services.ReleaseSupply(vars["user"])
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	res, err := json.Marshal(user)
-	if err != nil {
-		http.Error(w, "Marshall error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	if _, err := w.Write(res); err != nil {
-		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-}

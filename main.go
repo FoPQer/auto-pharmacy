@@ -43,8 +43,8 @@ func main() {
 	models.UserMigrate()
 
 	r := mux.NewRouter()
-	routes.RegisterWebRoutes(r)
-	routes.RegisterAuthRoutes(r)
+	routes.RegisterWebRoutes(r.NewRoute().Subrouter())
+	routes.RegisterAuthRoutes(r.NewRoute().Subrouter())
 
 	srv := http.Server{
 		Addr:         ":8080",
