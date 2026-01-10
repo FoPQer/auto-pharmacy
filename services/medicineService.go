@@ -73,6 +73,13 @@ func ForceDeleteMedicine(id string) error {
 	return nil
 }
 
+func MassDeleteMedicine(ids []int) error {
+	if err := database.MysqlDB.DB.Delete(&models.Medicine{}, ids).Error; err != nil {
+		return errors.Join(errors.New("Medicine mass delete error"), err)
+	}
+	return nil
+}
+
 func AssociateTagToMedicine(medicine_id string, tag_id string) (*models.Medicine, error) {
 	var medicine models.Medicine
 	var tag models.Tag

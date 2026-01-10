@@ -75,6 +75,13 @@ func ForceDeleteSupply(id string) error {
 	return nil
 }
 
+func MassDeleteSupply(ids []int) error {
+	if err := database.MysqlDB.DB.Delete(&models.MedicineSupply{}, ids).Error; err != nil {
+		return errors.Join(errors.New("Supply mass delete error"), err)
+	}
+	return nil
+}
+
 func ReleaseSupply(id string) (models.MedicineSupply, error) {
 	var supply models.MedicineSupply
 	err := database.MysqlDB.DB.Model(models.MedicineSupply{}).Order("expired_at").Where("expired_at > ? AND medicine_id = ?", time.Now(), id).Preload("Medicine").Find(&supply).Error

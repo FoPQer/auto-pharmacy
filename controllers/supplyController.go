@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
 func SupplyIndex(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +121,33 @@ func SupplyRestore(w http.ResponseWriter, r *http.Request) {
 func SupplyForceDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	if err := services.ForceDeleteSupply(vars["supply"]); err != nil {
+		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	if _, err := w.Write(nil); err != nil {
+		http.Error(w, "Send response error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func SupplyMassDelete(w http.ResponseWriter, r *http.Request) {
+	var data map[string][]int
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		http.Error(w, "Body parse error "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	ids, ok := data["ids"]
+	if !ok {
+		http.Error(w, "Data find error ", http.StatusInternalServerError)
+		return
+	}
+	err := services.MassDeleteSupply(ids)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if err != nil {
 		http.Error(w, "Supply error "+err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -26,6 +26,7 @@ func medicineRoutes(r *mux.Router) {
 	r.HandleFunc("/{medicine}/force", controllers.MedicineForceDelete).Methods("DELETE", "OPTIONS")
 	r.HandleFunc("/{medicine}/release", controllers.MedicineRelease).Methods("GET", "OPTIONS")
 	r.HandleFunc("/{medicine}/associate/{tag}", controllers.MedicineAssociateTag).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/delete/mass", controllers.MedicineMassDelete).Methods("POST", "OPTIONS")
 }
 
 func supplyRoutes(r *mux.Router) {
@@ -36,6 +37,7 @@ func supplyRoutes(r *mux.Router) {
 	r.HandleFunc("/{supply}", controllers.SupplyDelete).Methods("DELETE", "OPTIONS")
 	r.HandleFunc("/{supply}/restore", controllers.SupplyRestore).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/{supply}/force", controllers.SupplyForceDelete).Methods("DELETE", "OPTIONS")
+	r.HandleFunc("/delete/mass", controllers.SupplyMassDelete).Methods("POST", "OPTIONS")
 }
 
 func tagRoutes(r *mux.Router) {
