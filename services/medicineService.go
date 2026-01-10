@@ -9,7 +9,7 @@ import (
 
 func GetAllMedicines() ([]models.Medicine, error) {
 	var medicines = make([]models.Medicine, 0)
-	if err := database.MysqlDB.DB.Model(&models.Medicine{}).Preload("Supplies", &models.MedicineSupply{}).Find(&medicines).Error; err != nil {
+	if err := database.MysqlDB.DB.Model(&models.Medicine{}).Unscoped().Preload("Supplies", &models.MedicineSupply{}).Find(&medicines).Error; err != nil {
 		return nil, errors.Join(errors.New("Medicines Find error"), err)
 	}
 
@@ -18,7 +18,7 @@ func GetAllMedicines() ([]models.Medicine, error) {
 
 func GetMedicine(id string) (models.Medicine, error) {
 	var medicine models.Medicine
-	if err := database.MysqlDB.DB.Model(&models.Medicine{}).Preload("Supplies", &models.MedicineSupply{}).First(&medicine, id).Error; err != nil {
+	if err := database.MysqlDB.DB.Model(&models.Medicine{}).Unscoped().Preload("Supplies", &models.MedicineSupply{}).First(&medicine, id).Error; err != nil {
 		return models.Medicine{}, errors.Join(errors.New("Medicine First error"), err)
 	}
 

@@ -9,7 +9,7 @@ import (
 
 func GetAllTags() ([]models.Tag, error) {
 	var tags = make([]models.Tag, 0)
-	if err := database.MysqlDB.DB.Model(&models.Tag{}).Find(&tags).Error; err != nil {
+	if err := database.MysqlDB.DB.Model(&models.Tag{}).Unscoped().Find(&tags).Error; err != nil {
 		return nil, errors.Join(errors.New("Tags Find error"), err)
 	}
 
@@ -18,7 +18,7 @@ func GetAllTags() ([]models.Tag, error) {
 
 func GetTag(id string) (models.Tag, error) {
 	var tag models.Tag
-	if err := database.MysqlDB.DB.Model(&models.Tag{}).First(&tag, id).Error; err != nil {
+	if err := database.MysqlDB.DB.Model(&models.Tag{}).Unscoped().First(&tag, id).Error; err != nil {
 		return models.Tag{}, errors.Join(errors.New("Tag First error"), err)
 	}
 
