@@ -1,8 +1,8 @@
 package services
 
 import (
-	"auto-pharmacy/database"
-	"auto-pharmacy/models"
+	"auto-pharmacy/internal/database"
+	"auto-pharmacy/internal/models"
 	"encoding/json"
 	"errors"
 )

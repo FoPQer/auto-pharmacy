@@ -1,7 +1,7 @@
 package models
 
 import (
-	"auto-pharmacy/database"
+	"auto-pharmacy/internal/database"
 	"errors"
 	"fmt"
 	"strconv"

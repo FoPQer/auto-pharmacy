@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"auto-pharmacy/models"
+	"auto-pharmacy/internal/models"
 	"fmt"
 	"net/http"
 	"os"
