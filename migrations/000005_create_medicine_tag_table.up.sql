@@ -1,6 +1,6 @@
 CREATE TABLE medicine_tag (
-    medicine_id INT NOT NULL REFERENCES medicines(id) ON DELETE CASCADE,
-    tag_id INT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    medicine_id BIGINT NOT NULL REFERENCES medicines(id) ON DELETE CASCADE,
+    tag_id BIGINT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
     PRIMARY KEY (medicine_id, tag_id)
 );
 

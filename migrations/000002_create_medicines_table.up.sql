@@ -1,5 +1,5 @@
 CREATE TABLE medicines (
-    id SERIAL PRIMARY KEY,
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name VARCHAR(255) NOT NULL,
     measurement VARCHAR(50),
     dose FLOAT,

@@ -1,6 +1,6 @@
 CREATE TABLE supplies (
-    id SERIAL PRIMARY KEY,
-    medicine_id INTEGER REFERENCES medicines(id) ON DELETE CASCADE,
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    medicine_id BIGINT REFERENCES medicines(id) ON DELETE CASCADE,
     quantity INTEGER,
     expired_at DATE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
