@@ -4,7 +4,6 @@ import (
 	"auto-pharmacy/internal/models"
 	"auto-pharmacy/internal/repository"
 	"context"
-	"encoding/json"
 	"fmt"
 )
 
@@ -106,14 +105,30 @@ func (s *MedicineService) SetMedicine(ctx context.Context, req *CreateMedicineRe
 	}, nil
 }
 
-func (s *MedicineService) UpdateMedicine(ctx context.Context, id uint, body *json.Decoder) (*MedicineResponse, error) {
+func (s *MedicineService) UpdateMedicine(ctx context.Context, id uint, req *UpdateMedicineRequest) (*MedicineResponse, error) {
 	medicine, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	if err := body.Decode(&medicine); err != nil {
-		return nil, fmt.Errorf("Medicine decode error: %w", err)
+	if req.Name != nil {
+		medicine.Name = *req.Name
 	}
+	if req.Measurement != nil {
+		medicine.Measurement = req.Measurement
+	}
+	if req.Dose != nil {
+		medicine.Dose = *req.Dose
+	}
+	if req.Measurement_dose != nil {
+		medicine.Measurement_dose = req.Measurement_dose
+	}
+	if req.Box != nil {
+		medicine.Box = req.Box
+	}
+	if req.Place != nil {
+		medicine.Place = req.Place
+	}
+
 	if err := s.repo.Update(ctx, medicine); err != nil {
 		return nil, fmt.Errorf("Medicine save error: %w", err)
 	}
