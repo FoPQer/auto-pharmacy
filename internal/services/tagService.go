@@ -1,74 +1,110 @@
 package services
 
 import (
-	"auto-pharmacy/internal/database"
 	"auto-pharmacy/internal/models"
-	"encoding/json"
-	"errors"
+	"auto-pharmacy/internal/repository"
+	"context"
+	"fmt"
 )
 
-func GetAllTags() ([]models.Tag, error) {
-	var tags = make([]models.Tag, 0)
-	if err := database.MysqlDB.DB.Model(&models.Tag{}).Unscoped().Find(&tags).Error; err != nil {
-		return nil, errors.Join(errors.New("Tags Find error"), err)
-	}
-
-	return tags, nil
+type TagResponse struct {
+	ID    uint   `json:"id"`
+	Name  string `json:"name"`
 }
 
-func GetTag(id string) (models.Tag, error) {
-	var tag models.Tag
-	if err := database.MysqlDB.DB.Model(&models.Tag{}).Unscoped().First(&tag, id).Error; err != nil {
-		return models.Tag{}, errors.Join(errors.New("Tag First error"), err)
-	}
-
-	return tag, nil
+type GetTagRequest struct {
+	ID uint `json:"id" param:"tag" validate:"required"`
 }
 
-func SetTag(body *json.Decoder) (models.Tag, error) {
-	tag := models.Tag{}
-	if err := body.Decode(&tag); err != nil {
-		return models.Tag{}, errors.Join(errors.New("Tag decode error"), err)
-	}
-	if err := database.MysqlDB.DB.Create(&tag).Error; err != nil {
-		return models.Tag{}, errors.Join(errors.New("Tag create error"), err)
-	}
-
-	return tag, nil
+type CreateTagRequest struct {
+	Name     string `json:"name" validate:"min=2,max=255"`
 }
 
-func UpdateTag(id string, body *json.Decoder) (models.Tag, error) {
-	tag, err := GetTag(id)
+type UpdateTagRequest struct {
+	Name     *string `json:"name,omitempty" validate:"omitempty,min=2,max=255"`
+}
+
+type TagService struct{
+	repo repository.TagRepository
+}
+
+func (s *TagService) GetAllTags(ctx context.Context) ([]*TagResponse, error) {
+	tags, err := s.repo.GetAll(ctx)
 	if err != nil {
-		return models.Tag{}, err
-	}
-	if err := body.Decode(&tag); err != nil {
-		return models.Tag{}, errors.Join(errors.New("Tag decode error"), err)
-	}
-	if err := database.MysqlDB.DB.Save(&tag).Error; err != nil {
-		return models.Tag{}, errors.Join(errors.New("Tag save error"), err)
+		return nil, fmt.Errorf("Tags GetAll error: %w", err)
 	}
 
-	return tag, nil
+	var response = make([]*TagResponse, len(tags))
+	for i, tag := range tags {
+		response[i] = &TagResponse{
+			ID:   tag.ID,
+			Name: tag.Name,
+		}
+	}
+	return response, nil
 }
 
-func DeleteTag(id string) error {
-	if err := database.MysqlDB.DB.Delete(&models.Tag{}, id).Error; err != nil {
-		return errors.Join(errors.New("Tag delete error"), err)
+func (s *TagService) GetTag(ctx context.Context, id uint) (*TagResponse, error) {
+	tag, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("Tag GetByID error: %w", err)
+	}
+
+	return &TagResponse{
+		ID:   tag.ID,
+		Name: tag.Name,
+	}, nil
+}
+
+func (s *TagService) SetTag(ctx context.Context, req *CreateTagRequest) (*TagResponse, error) {
+	tag := models.NewTag(req.Name)
+	createdTag, err := s.repo.Create(ctx, tag)
+	if err != nil {
+		return nil, fmt.Errorf("Tag Create error: %w", err)
+	}
+
+	return &TagResponse{
+		ID:   createdTag.ID,
+		Name: createdTag.Name,
+	}, nil
+}
+
+func (s *TagService) UpdateTag(ctx context.Context, id uint, req *UpdateTagRequest) (*TagResponse, error) {
+	tag, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("Tag GetByID error: %w", err)
+	}
+	if req.Name != nil {
+		tag.Name = *req.Name
+	}
+	
+	if err := s.repo.Update(ctx, tag); err != nil {
+		return nil, fmt.Errorf("Tag Update error: %w", err)
+	}
+
+	return &TagResponse{
+		ID:   tag.ID,
+		Name: tag.Name,
+	}, nil
+}
+
+func (s *TagService) DeleteTag(ctx context.Context, id uint) error {
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return fmt.Errorf("Tag delete error: %w", err)
 	}
 	return nil
 }
 
-func RestoreTag(id string) error {
-	if err := database.MysqlDB.DB.Unscoped().Model(&models.Tag{}).Where("id = ?", id).Update("deleted_at", nil).Error; err != nil {
-		return errors.Join(errors.New("Tag restore error"), err)
+func (s *TagService) RestoreTag(ctx context.Context, id uint) error {
+	if err := s.repo.Restore(ctx, id); err != nil {
+		return fmt.Errorf("Tag restore error: %w", err)
 	}
 	return nil
 }
 
-func ForceDeleteTag(id string) error {
-	if err := database.MysqlDB.DB.Unscoped().Delete(&models.Tag{}, id).Error; err != nil {
-		return errors.Join(errors.New("Tag force delete error"), err)
+func (s *TagService) ForceDeleteTag(ctx context.Context, id uint) error {
+	if err := s.repo.ForceDelete(ctx, id); err != nil {
+		return fmt.Errorf("Tag force delete error: %w", err)
 	}
 	return nil
 }

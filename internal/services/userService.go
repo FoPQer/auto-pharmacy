@@ -71,7 +71,7 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*UserResponse, error) 
 	return userResponses, nil
 }
 
-func (s *UserService) GetUser(ctx context.Context, req *GetUserRequest) (*models.User, error) {
+func (s *UserService) GetUser(ctx context.Context, req *GetUserRequest) (*UserResponse, error) {
 	var user *models.User
 	var err error
 	switch {
@@ -83,7 +83,11 @@ func (s *UserService) GetUser(ctx context.Context, req *GetUserRequest) (*models
 			return nil, err
 		}
 
-		return user, nil
+		return &UserResponse{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+		}, nil
 	}
 	return nil, &ErrUserNotFound{ID: req.ID, Email: req.Email}
 }
@@ -145,42 +149,46 @@ func (s *UserService) UpdateUser(ctx context.Context, id uint, req *UpdateUserRe
 }
 
 func (s *UserService) ChangePassword(ctx context.Context, id uint, req *ChangePasswordRequest) error {
-	user, err := s.GetUser(ctx, &GetUserRequest{ID: id})
+	user, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
 	user.Password, err = models.HashPassword(req.Password)
 	if err != nil {
-		return errors.Join(errors.New("Hashing Password error"), err)
+		return fmt.Errorf("Hashing Password error: %w", err)
 	}
+
+	if err := s.repo.Update(ctx, user); err != nil {
+        return fmt.Errorf("User update error: %w", err)
+    }
 
 	return nil
 }
 
 func (s *UserService) DeleteUser(ctx context.Context, id uint) error {
 	if err := s.repo.Delete(ctx, id); err != nil {
-		return errors.Join(errors.New("User delete error"), err)
+		return fmt.Errorf("User delete error: %w", err)
 	}
 	return nil
 }
 
 func (s *UserService) RestoreUser(ctx context.Context, id uint) error {
 	if err := s.repo.Restore(ctx, id); err != nil {
-		return errors.Join(errors.New("User restore error"), err)
+		return fmt.Errorf("User restore error: %w", err)
 	}
 	return nil
 }
 
 func (s *UserService) ForceDeleteUser(ctx context.Context, id uint) error {
 	if err := s.repo.ForceDelete(ctx, id); err != nil {
-		return errors.Join(errors.New("User force delete error"), err)
+		return fmt.Errorf("User force delete error: %w", err)
 	}
 	return nil
 }
 
 func (s *UserService) MassDeleteUser(ctx context.Context, ids []uint) error {
 	if err := s.repo.MassDelete(ctx, ids); err != nil {
-		return errors.Join(errors.New("User mass delete error"), err)
+		return fmt.Errorf("User mass delete error: %w", err)
 	}
 	return nil
 }

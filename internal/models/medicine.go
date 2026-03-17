@@ -49,8 +49,12 @@ func (m Medicine) Supply(count float64, expired_at time.Time) *MedicineSupply {
 	return NewMedicineSupply(count, expired_at, m.ID)
 }
 
-func (med *Medicine) AppendTag(t *Tag) error {
-	if err := database.MysqlDB.DB.Model(med).Association("Tags").Append(t); err != nil {
+func (med *Medicine) AppendTag(tagID uint) error {
+	var tag Tag
+	if err := database.MysqlDB.DB.First(&tag, tagID).Error; err != nil {
+		return errors.Join(errors.New("Medicine Append Tag error"), err)
+	}
+	if err := database.MysqlDB.DB.Model(med).Association("Tags").Append(&tag); err != nil {
 		return errors.Join(errors.New("Medicine Append Tag error"), err)
 	}
 	return nil

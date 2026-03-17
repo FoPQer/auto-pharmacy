@@ -18,7 +18,7 @@ type UserRepository interface {
 }
 
 type MedicineRepository interface {
-	Create(ctx context.Context, medicine *models.Medicine) (*models.User, error)
+	Create(ctx context.Context, medicine *models.Medicine) (*models.Medicine, error)
 	GetByID(ctx context.Context, id uint) (*models.Medicine, error)
 	GetAll(ctx context.Context) ([]models.Medicine, error)
 	Update(ctx context.Context, medicine *models.Medicine) error
@@ -28,9 +28,16 @@ type MedicineRepository interface {
 	MassDelete(ctx context.Context, ids []uint) error
 }
 
+type MedicineTagRepository interface {
+    Associate(ctx context.Context, medicineID uint, tagID uint) error
+    Dissociate(ctx context.Context, medicineID uint, tagID uint) error
+    GetTagsByMedicineID(ctx context.Context, medicineID uint) ([]models.Tag, error)
+}
+
 type MedicineSupplyRepository interface {
-	Create(ctx context.Context, supply *models.MedicineSupply) (*models.User, error)
+	Create(ctx context.Context, supply *models.MedicineSupply) (*models.MedicineSupply, error)
 	GetByID(ctx context.Context, id uint) (*models.MedicineSupply, error)
+	GetOlderExpiringSupplyByMedicineID(ctx context.Context, medicineID uint) (*models.MedicineSupply, error)
 	GetByMedicineID(ctx context.Context, medicineID uint) ([]models.MedicineSupply, error)
 	GetAll(ctx context.Context) ([]models.MedicineSupply, error)
 	Update(ctx context.Context, supply *models.MedicineSupply) error
@@ -41,7 +48,7 @@ type MedicineSupplyRepository interface {
 }
 
 type TagRepository interface {
-	Create(ctx context.Context, tag *models.Tag) (*models.User, error)
+	Create(ctx context.Context, tag *models.Tag) (*models.Tag, error)
 	GetByID(ctx context.Context, id uint) (*models.Tag, error)
 	GetAll(ctx context.Context) ([]models.Tag, error)
 	Update(ctx context.Context, tag *models.Tag) error
